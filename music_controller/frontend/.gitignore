@@ -1,0 +1,5 @@
+node_modules/
+migrations/
+_pycache_/
+
+*.json
