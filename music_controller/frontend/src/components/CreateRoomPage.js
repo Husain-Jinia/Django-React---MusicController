@@ -84,8 +84,8 @@ export default class CreateRoomPage extends Component {
                     errorMsg:"Error updating"
                 })
             }
-        })
-        .then((data)=>this.props.history.push('/room/'+ data.code));
+            this.props.updateCallback();
+        });
     }
     renderCreateButtons(){
         return (
@@ -140,7 +140,8 @@ export default class CreateRoomPage extends Component {
                             Guest Control of playback state
                         </div>
                     </FormHelperText>
-                    <RadioGroup row defaultValue="true" onChange={this.handleGuestCanPauseChange}>
+                    <RadioGroup row defaultValue={this.props.guestCanPause.toString()}
+                    onChange={this.handleGuestCanPauseChange}>
                         <FormControlLabel 
                         value="true" 
                         control={<Radio color="primary"/>}
