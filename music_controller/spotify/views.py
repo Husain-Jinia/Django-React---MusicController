@@ -5,8 +5,10 @@ from .credentials import REDIRECT_URI, CLIENT_SECRET, CLIENT_ID
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
+from requests import Request, post
 
 
+#sending request to url
 class AuthURL(APIView):
     def get(self, request, format=None):
         scopes = 'user-read-playback-state user-modify-playback-state user-read-currently-playing'
@@ -15,6 +17,25 @@ class AuthURL(APIView):
             'response_type': 'code',
             'redirect_uri': REDIRECT_URI,
             'client_id': CLIENT_ID
-        }).prepare().URI
+        }).prepare().url
 
         return Response({'url': url}, status=status.HTTP_200_OK)
+
+#getting reqired response as json
+def spotify_callback(request, format=None):
+    code = request.GET.get('code')
+    error = request.GET.get('error')
+
+    response = post('https://accounts.spotify.com/api/token', data={
+        'grant_type': 'authorization_code',
+        'code': code,
+        'redirect_uri': REDIRECT_URI,
+        'client_id':CLIENT_ID,
+        'client_secret': CLIENT_SECRET
+    }).json()
+
+    access_token = response.get('access_token')
+    token_type = response.get('token_type')
+    refresh_token = response.get('refresh_token')
+    expires_in = response.get('expires_in')
+    error = response.get('error')
