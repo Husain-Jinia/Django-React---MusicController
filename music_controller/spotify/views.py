@@ -6,8 +6,8 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from requests import Request, post
-from .util import update_or_create_user_tokens
-
+from .util import is_spotify_authenticated, update_or_create_user_tokens
+from api.models import Room
 
 #sending request to url
 class AuthURL(APIView):
