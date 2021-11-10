@@ -38,16 +38,16 @@ export default class Room extends Component{
         return fetch("/api/get-room" + "?code=" + this.roomCode)
         .then((response)=>{
             if(!response.ok){
-                this.props.leaveRoomCallback()
-                this.props.history.push("/")
+                this.props.leaveRoomCallback();
+                this.props.history.push("/");
             }
-            return response.json()
+            return response.json();
         })
         .then((data)=>{this.setState({votesToSkip: data.votes_to_skip,
              guestCanPause: data.guest_can_pause,
               isHost: data.is_host,})
               if(this.state.isHost){
-                  this.authenticateSpotify()
+                  this.authenticateSpotify();
               }
             })
     }
