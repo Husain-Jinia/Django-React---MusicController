@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from requests import Request, post
-from .util import is_spotify_authenticated, update_or_create_user_tokens
+from .util import *
 from api.models import Room
 
 #sending request to url
@@ -60,5 +60,9 @@ class CurrentSong(APIView):
         room = Room.objects.filter(code=room_code)[0]
         host = room.host
         endpoint = '/player/currently-playing'
+        response = execute_spotify_api_request(host, endpoint)
+        print(response)
+
+        return Response(response,status=status.HTTP_200_OK)
 
 
