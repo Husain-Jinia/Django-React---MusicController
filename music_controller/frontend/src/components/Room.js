@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import {Grid, Button, Typography} from '@material-ui/core';
 import {Link} from 'react-router-dom'
 import CreateRoomPage from './CreateRoomPage';
+import MusicPlayer from "./MusicPlayer"
 
 export default class Room extends Component{
     constructor(props){
@@ -11,7 +12,8 @@ export default class Room extends Component{
             guestCanPause: false,
             isHost: false,
             showSettings: false,
-            spotifyAuthenticated: false
+            spotifyAuthenticated: false,
+            song:{}
         };
         this.roomCode = this.props.match.params.roomCode;
         this.leaveButtonPressed = this.leaveButtonPressed.bind(this)
@@ -20,7 +22,16 @@ export default class Room extends Component{
         this.renderSettings = this.renderSettings.bind(this)
         this.getRoomDetails = this.getRoomDetails.bind(this)
         this.authenticateSpotify = this.authenticateSpotify.bind(this)
+        this.getCurrentSong = this.getCurrentSong.bind(this)
         this.getRoomDetails();
+    }
+
+    componentDidMount(){
+        this.interval = setInterval(this.getCurrentSong, 1000)
+    }
+
+    componentWillUnmount(){
+        clearInterval(this.interval)
     }
 
     getRoomDetails(){
@@ -34,7 +45,7 @@ export default class Room extends Component{
         })
         .then((data)=>{this.setState({votesToSkip: data.votes_to_skip,
              guestCanPause: data.guest_can_pause,
-              isHost: data.is_host})
+              isHost: data.is_host,})
               if(this.state.isHost){
                   this.authenticateSpotify()
               }
@@ -42,22 +53,36 @@ export default class Room extends Component{
     }
 
     authenticateSpotify(){
-        fetch('/spotify/is-authenticated')
+        fetch("/spotify/is-authenticated")
         .then((response)=> response.json())
-        .then((data)=>{this.setState({spotifyAuthenticated : data.status})
+        .then((data)=>{this.setState({spotifyAuthenticated: data.status})
         if(!data.status){
             fetch('/spotify/get-auth-url')
             .then((response)=> response.json())
-            .then((data) =>{data.url})
-            window.location.replace(data.url);
+            .then((data) =>{
+                window.location.replace(data.url);
+            })
+            
         }
     })
+    }
+
+    getCurrentSong(){
+        fetch('/spotify/current-song').then((response)=>{
+            if(!response.ok){
+                return{};
+                
+            }
+            else{
+                return response.json()
+            }
+        }).then((data)=>this.setState({song:data}))
     }
 
     leaveButtonPressed(){
         const requestOptions={
             method: 'POST',
-            headers: {'content':'application/json'},
+            headers: {'Content-Type':'application/json'},
         }
         fetch('/api/leave-room', requestOptions).then((_response) => {
             this.props.leaveRoomCallback()
@@ -111,21 +136,8 @@ export default class Room extends Component{
                         Code: {this.roomCode}
                     </Typography>
                 </Grid>
-                <Grid item xs={12} align="center">
-                    <Typography variant="h6" component="h6">
-                        Votes :{this.state.votesToSkip}
-                    </Typography>
-                </Grid>
-                <Grid item xs={12} align="center">
-                    <Typography variant="h6" component="h6">
-                        Guest Can Pause : {this.state.guestCanPause.toString()}
-                    </Typography>
-                </Grid>
-                <Grid item xs={12} align="center">
-                    <Typography variant="h6" component="h6">
-                        Host : {this.state.isHost.toString()}
-                    </Typography>
-                </Grid>
+                <MusicPlayer {...this.state.song}/>
+                {this.state.song}
                 {this.state.isHost? this.renderSettingsButton():null}
                 <Grid item xs={12} align="center">
                     <Button variant="contained" color="secondary" onClick={this.leaveButtonPressed}>
