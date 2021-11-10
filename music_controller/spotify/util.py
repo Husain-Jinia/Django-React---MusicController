@@ -8,7 +8,7 @@ from django.utils import timezone
 from requests import post, put, get
 
 
-BASE_URL = "http://api.spotify.com/v1/me/"
+BASE_URL = "https://api.spotify.com/v1/me/"
 
 def get_user_token(session_id):
     user_tokens = SpotifyToken.objects.filter(user=session_id)
